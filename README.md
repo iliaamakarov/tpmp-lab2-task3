@@ -1,8 +1,8 @@
-#Overview
+# Overview
 laba 2
-#Author
+# Author
 Ilia makarov
-#Usage
+# Usage
 Education idk
-#Additional Notes.
+# Additional Notes.
 i hate this
