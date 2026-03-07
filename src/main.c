@@ -33,6 +33,86 @@ void print(struct ABADDON* a) {
     }
 }
 
+struct ABADDON* InitializeArray(const unsigned int _n) {
+    struct ABADDON* arr = (struct ABADDON*)calloc(_n, sizeof(struct ABADDON));
+    if (arr == NULL) {
+            printf("Allocation error, idiot\n");
+            return NULL;
+        }
+
+    printf("I couldn't bother handling errors for each input so type correctly pls\n");
+    ungetc('\n', stdin);
+    for (unsigned int i = 0; i < _n; i++) {
+        while (getchar() != '\n');                          //clear buffer bcs it's C
+        printf("Enter name and initials: \n");
+        fgets(arr[i].fullName, MAX_NAME, stdin);            //whatever this is
+        size_t len = strlen(arr[i].fullName);               //:)
+        if (len > 0 && arr[i].fullName[len - 1] == '\n')    //remove trailing \n bcs it's C
+            arr[i].fullName[len - 1] = '\0';
+        printf("Enter number: \n");                           //same here
+        fgets(arr[i].number, MAX_PHONE, stdin);
+        len = strlen(arr[i].number);
+        if (len > 0 && arr[i].number[len - 1] == '\n')
+            arr[i].number[len - 1] = '\0';
+        printf("Enter registration date(yyyy:mm:dd), including 0-s: \n");
+        int y, m, d;
+        scanf("%d:%d:%d", &y, &m, &d);
+        arr[i].registrationDate.tm_year = y - 1900;
+        arr[i].registrationDate.tm_mon = m - 1;
+        arr[i].registrationDate.tm_mday = d;
+        printf("Enter balance: \n");
+        scanf("%lf", &(arr[i].balance));
+        printf("Enter tariff: \n");
+        scanf("%lf", &(arr[i].tarif));
+    }
+    return arr;
+}
+
+void SortArray(struct ABADDON* arr, const unsigned int n) {
+    qsort(arr, n, sizeof(struct ABADDON), compare);
+}
+
+void Add20ToOldAccounts(struct ABADDON* arr, const unsigned int n) {
+    time_t mytime = time(NULL);
+    struct tm* now = localtime(&mytime);
+    for (unsigned int i = 0; i < n; i++) {
+        if (now->tm_year - arr[i].registrationDate.tm_year >= 10) {
+            arr[i].balance += 20.0;
+            printf("added 20 dollar to %s\n", arr[i].fullName);
+        }
+    }
+}
+
+void ShowNegativeAccounts(struct ABADDON* arr, const unsigned int n) {
+    printf("balances that go negative after subtracting their tariff:\n");
+    int check = 0;
+    for (unsigned int i = 0; i < n; i++) {
+        if (arr[i].balance - arr[i].tarif < 0.0) {
+            print(&arr[i]);
+            check = 1;
+        }
+    } 
+    if (!check) {
+        printf("no such balances found, rich idiot\n");
+    }
+}
+
+void FindAccountByPhone(struct ABADDON* arr, const unsigned int n ) {
+    char phone[MAX_PHONE];
+    int check = 0;
+    printf("\nEnter phone number to search:\n");
+    scanf("%s", phone);
+    for (unsigned int i = 0; i < n; i++) {
+        if (strcmp(phone, arr[i].number) == 0) {
+            print(&arr[i]);
+            check = 1;
+            break;
+        }
+    }
+    if (!check) {
+        printf("no such phones, better luck next time.\n");
+    }
+}
 
 int main(int argc, char* argv[])
 {
@@ -49,80 +129,11 @@ int main(int argc, char* argv[])
         printf("%d\n", n);
         //
         //array
-        struct ABADDON* arr = (struct ABADDON*)calloc(n, sizeof(struct ABADDON));
-        if (arr == NULL) {
-            printf("Allocation error, idiot\n");
-            return -1;
-        }
-        printf("I couldn't bother handling errors for each input so type correctly pls\n");
-        ungetc('\n', stdin);
-        for (unsigned int i = 0; i < n; i++) {
-
-            while (getchar() != '\n');                          //clear buffer bcs it's C
-
-            printf("Enter name and initials: \n");
-
-            fgets(arr[i].fullName, MAX_NAME, stdin);            //whatever this is
-            size_t len = strlen(arr[i].fullName);               //:)
-            if (len > 0 && arr[i].fullName[len - 1] == '\n')    //remove trailing \n bcs it's C
-                arr[i].fullName[len - 1] = '\0';
-
-            printf("Enter number: \n");                           //same here
-            fgets(arr[i].number, MAX_PHONE, stdin);
-            len = strlen(arr[i].number);
-            if (len > 0 && arr[i].number[len - 1] == '\n')
-                arr[i].number[len - 1] = '\0';
-            printf("Enter registration date(yyyy:mm:dd), including 0-s: \n");
-            int y, m, d;
-            scanf("%d:%d:%d", &y, &m, &d);
-            arr[i].registrationDate.tm_year = y - 1900;
-            arr[i].registrationDate.tm_mon = m - 1;
-            arr[i].registrationDate.tm_mday = d;
-
-            printf("Enter balance: \n");
-            scanf("%lf", &(arr[i].balance));
-
-            printf("Enter tariff: \n");
-            scanf("%lf", &(arr[i].tarif));
-        }
-
-        qsort(arr, n, sizeof(struct ABADDON), compare);
-
-        time_t mytime = time(NULL);
-        struct tm* now = localtime(&mytime);
-        for (unsigned int i = 0; i < n; i++) {
-            if (now->tm_year - arr[i].registrationDate.tm_year >= 10) {
-                arr[i].balance += 20.0;
-                printf("added 20 dollar to %s\n", arr[i].fullName);
-            }
-        }
-
-        printf("balances that go negative after subtracting their tariff:\n");
-        int check = 0;
-        for (unsigned int i = 0; i < n; i++) {
-            if (arr[i].balance - arr[i].tarif < 0.0) {
-                print(&arr[i]);
-                check = 1;
-            }
-        } 
-        if (!check) {
-            printf("no such balances found, rich idiot\n");
-        }
-
-        char phone[MAX_PHONE];
-        check = 0;
-        printf("\nEnter phone number to search:\n");
-        scanf("%s", phone);
-        for (unsigned int i = 0; i < n; i++) {
-            if (strcmp(phone, arr[i].number) == 0) {
-                print(&arr[i]);
-                check = 1;
-                break;
-            }
-        }
-        if (!check) {
-            printf("no such phones, better luck next time.\n");
-        }
+        struct ABADDON* arr = InitializeArray(n);
+        SortArray(arr, n);
+        Add20ToOldAccounts(arr, n);
+        ShowNegativeAccounts(arr, n);
+        FindAccountByPhone(arr, n);
 
         free(arr);
     }
