@@ -5,3 +5,6 @@ build: src/main.c
 
 clean:
 	del $(wildcard *.exe)
+
+run:
+	./executable
